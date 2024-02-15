@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Speech App</title>
+</head>
+<body>
+    <h1>Speech App</h1>
+
+    <form action="/synthesize" method="post" enctype="multipart/form-data">
+        <label for="text">Text to Synthesize:</label>
+        <input type="text" id="text" name="text" required>
+        <button type="submit">Synthesize</button>
+    </form>
+
+    <form action="/translate" id="translate-form" method="post" enctype="multipart/form-data">
+        <label for="audio">Upload Audio File:</label>
+        <input type="file" id="audio" name="audio" accept=".wav, .mp3" required>
+        <button type="submit">Translate</button>
+    </form>
+
+    {% if transcribed_text %}
+        <div>
+            <h2>Transcribed Text:</h2>
+            <p>{{ transcribed_text }}</p>
+        </div>
+    {% endif %}
+
+    <!-- Add the following script at the end of the <body> tag in index.html -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+<script type="text/javascript">
+    var socket = io.connect('http://' + document.domain + ':' + location.port);
+
+    // Translate form submission
+    document.querySelector('#translate-form').addEventListener('submit', function(event) {
+        event.preventDefault();
+        var audio = document.querySelector('#audio').files[0];
+        var formData = new FormData();
+        formData.append('audio', audio);
+        socket.emit('translation', {'audio': formData});
+    });
+
+    // Listen for transcription updates
+    socket.on('transcription_update', function(data) {
+        var transcribedTextElement = document.getElementById('transcribed-text');
+        transcribedTextElement.innerHTML = '<h2>Transcribed Text:</h2><p>' + data.text + '</p>';
+    });
+</script>
+</body>
+</html>

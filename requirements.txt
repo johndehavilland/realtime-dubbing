@@ -1,2 +1,4 @@
 azure-cognitiveservices-speech
 python-dotenv
+flask
+flask-socketio
